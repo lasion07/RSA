@@ -116,14 +116,16 @@ class RSA_NHOM6:
         M = self.mod_pow(C, d, n)
         return M
 
-RSA = RSA_NHOM6()
-# public_key, private_key = RSA.generate_key()
-public_key, private_key = RSA.load_key()
 
-text = 123456
-C = RSA.encrypt(text, public_key)
-M = RSA.decrypt(C, private_key)
+if __name__ == '__main__':
+    RSA = RSA_NHOM6()
+    # public_key, private_key = RSA.generate_key()
+    public_key, private_key = RSA.load_key()
 
-print('Plaintext:', text)
-print('Ciphertext:', C)
-print('Decrypted ciphertext:', M)
+    text = 123456
+    C = RSA.encrypt(text, public_key)
+    M = RSA.decrypt(C, private_key)
+
+    print('Plaintext:', text)
+    print('Ciphertext:', C)
+    print('Decrypted ciphertext:', M)
