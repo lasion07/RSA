@@ -57,14 +57,3 @@ def isMillerRabinPassed(mrc):
 		if trialComposite(round_tester):
 			return False
 	return True
-
-
-if __name__ == '__main__':
-	with open('private_key.txt', mode='w') as f:
-		a = 5
-		b = 6
-		f.write(a, b)
-
-	with open('private_key.txt', mode='r') as f:
-		a, b = map(int, f.read().split(','))	
-		print(a, b)

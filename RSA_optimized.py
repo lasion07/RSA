@@ -3,6 +3,10 @@ import rabin_miller as rm
 
 
 class RSA_NHOM6:
+    def __init__(self):
+        self.public_key = None
+        self.private_key = None
+
     def generate_key(self, e_default=65537, save_path='keys'):
         """
         input: p, q: both prime, p # q
@@ -78,54 +82,91 @@ class RSA_NHOM6:
         
         print(f'Saved keys in {save_path}/')
 
-        return (e, n), (d, n)
-
     def load_key(self, path='keys'):
-        public_key, private_key = None, None
         with open(f'{path}/public_key.txt', mode='r') as f:
-            public_key = map(int, f.read().split(','))
+            self.public_key = set(map(int, f.read().split(',')))
         
         with open(f'{path}/private_key.txt', mode='r') as f:
-            private_key = map(int, f.read().split(','))
+            self.private_key = set(map(int, f.read().split(',')))
         
-        return public_key, private_key
-
-    # calculate a^b mod m using modular exponentiation
-    def mod_pow(self, a, b, m): # Log(n)
-        result = 1
-        while b > 0:
-            if b & 1:
-                result = (result * a) % m
-            
-            a = (a * a) % m;
-            b >>= 1
-        return result
+        if self.public_key == None or self.private_key == None:
+            print('Can not load key')
 
     # encrypt message
-    def encrypt(self, M, public_key):
-        e, n = public_key
+    def encrypt(self, M):
+        # calculate a^b mod m using modular exponentiation
+        def mod_pow(a, b, m): # Log(n)
+            result = 1
+            while b > 0:
+                if b & 1:
+                    result = (result * a) % m
+                
+                a = (a * a) % m;
+                b >>= 1
+            return result
+
+        e, n = self.public_key
         if M > n:
             print('Can not encrypt plaintext')
             return None
-        C = self.mod_pow(M, e, n)
+        C = mod_pow(M, e, n)
         return C
     
     # decrypt ciphertext
-    def decrypt(self, C, private_key):
-        d, n = private_key
-        M = self.mod_pow(C, d, n)
+    def decrypt(self, C):
+        # calculate a^b mod m using modular exponentiation
+        def mod_pow(a, b, m): # Log(n)
+            result = 1
+            while b > 0:
+                if b & 1:
+                    result = (result * a) % m
+                
+                a = (a * a) % m;
+                b >>= 1
+            return result
+
+        d, n = self.private_key
+        M = mod_pow(C, d, n)
         return M
+
+    # First converting each character to its ASCII value and
+    # then encoding it then decoding the number to get the
+    # ASCII and converting it to character
+    def encode(self, message):
+        encoded = []
+        # Calling the encrypting function in encoding function
+        for letter in message:
+            encoded.append(self.encrypt(ord(letter)))
+        return encoded
+    
+    def decode(self, encoded):
+        s = ''
+        # Calling the decrypting function decoding function
+        for num in encoded:
+            s += chr(self.decrypt(num))
+        return s
 
 
 if __name__ == '__main__':
     RSA = RSA_NHOM6()
-    # public_key, private_key = RSA.generate_key()
-    public_key, private_key = RSA.load_key()
+    # RSA.generate_key()
+    RSA.load_key()
 
-    text = 123456
-    C = RSA.encrypt(text, public_key)
-    M = RSA.decrypt(C, private_key)
+    
+    # text = 99
+    # C = RSA.encrypt(text)
+    # M = RSA.decrypt(C)
 
-    print('Plaintext:', text)
-    print('Ciphertext:', C)
-    print('Decrypted ciphertext:', M)
+    # print('Plaintext:', text)
+    # print('Ciphertext:', C)
+    # print('Decrypted ciphertext:', M)
+
+    message = "A secret!"
+    coded = RSA.encode(message)
+
+    print("Initial message:")
+    print(message)
+    print("\n\nThe encoded message(encrypted by public key)")
+    print(''.join(str(p) for p in coded))
+    print("\n\nThe decoded message(decrypted by public key)")
+    print(''.join(str(p) for p in RSA.decode(coded)))
