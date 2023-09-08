@@ -77,7 +77,7 @@ class SercurityMessageApp(QtWidgets.QMainWindow):
                 self.ui.Pubilic_key_output.setText(f'({e}, {n})')
                 self.ui.Private_key_output.setText(f'({d}, {n})')
 
-                print('Import succesful')
+                print('Imported from keys/')
         except:
             print('Can not import')
 
