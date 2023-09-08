@@ -33,61 +33,66 @@ class RSA_NHOM6:
             return gcd, x, y
 
         generate_time = time.time()
-        max_tries = 10
-        while max_tries > 0:
-            n_bit = 1024 # modulus size, default: 1024 bits
+        n_bit = 1024 # modulus size, default: 1024 bits
 
-            # Select random large prime numbers p and q
-            p, q = -1, -1
-            while True:
-                p = rm.getLowLevelPrime(n_bit)
-                if rm.isMillerRabinPassed(p):
-                    break
-            
-            while True:
-                q = rm.getLowLevelPrime(n_bit)
-                if rm.isMillerRabinPassed(q):
-                    break
+        # Select random large prime numbers p and q
+        p, q = -1, -1
+        while True:
+            p = rm.getLowLevelPrime(n_bit)
+            if rm.isMillerRabinPassed(p):
+                break
+        
+        while True:
+            q = rm.getLowLevelPrime(n_bit)
+            if rm.isMillerRabinPassed(q):
+                break
 
-            n = p * q
-            phi_n = (p - 1) * (q - 1)
+        n = p * q
+        phi_n = (p - 1) * (q - 1)
 
-            # Select e
-            e = e_default
-            if e > phi_n or e < 1:
-                print('ERROR: The e value must be 1 < e < phi(n)')
-                continue
-            elif gcd(phi_n, e) != 1:
-                print('ERROR: The greatest common division of phi_n and e does not equal 1')
-                continue
-
-            # Caculate d using Extended Euclidean Algorithm appoarch
-            _, d, _ = extended_gcd(e, phi_n)
-
-            if d > phi_n or d < 1:
-                print('ERROR: The d value must be 1 < e < phi(n)')
-                continue
-            
+        # Select e
+        e = e_default
+        if e > phi_n or e < 1:
+            print('ERROR: The e value must be 1 < e < phi(n)')
             max_tries -= 1
+            return None, None
+        elif gcd(phi_n, e) != 1:
+            print('ERROR: The greatest common division of phi_n and e does not equal 1')
+            max_tries -= 1
+            return None, None
+
+        # Caculate d using Extended Euclidean Algorithm appoarch
+        _, d, _ = extended_gcd(e, phi_n)
+
+        if d < 0:
+            d += phi_n
+
+        if d > phi_n or d < 1:
+            print('ERROR: The d value must be 1 < e < phi(n)')
+            max_tries -= 1
+            return None, None
         
         print(f'Keys were generated successfully after {time.time() - generate_time}s')
         # print('Public key:', (e, n))
         # print('Private key:', (d, n))
+        self.public_key = (e, n)
+        self.private_key = (d, n)
 
-        with open(f'{save_path}/public_key.txt', mode='w') as f:
+        with open(f'{save_path}/public_key_temp.txt', mode='w') as f:
             f.write(f'{e},{n}')
         
-        with open(f'{save_path}/private_key.txt', mode='w') as f:
+        with open(f'{save_path}/private_key_temp.txt', mode='w') as f:
             f.write(f'{d},{n}')
         
-        print(f'Saved keys in {save_path}/')
+        print(f'Saved temp keys in {save_path}/')
 
     def load_key(self, path='keys'):
-        with open(f'{path}/public_key.txt', mode='r') as f:
-            self.public_key = set(map(int, f.read().split(',')))
+        with open(f'{path}/public_key.txt', mode='r') as pu:
+            self.public_key = set(map(int, pu.read().split(',')))
+            print(pu.read())
         
-        with open(f'{path}/private_key.txt', mode='r') as f:
-            self.private_key = set(map(int, f.read().split(',')))
+        with open(f'{path}/private_key.txt', mode='r') as pr:
+            self.private_key = set(map(int, pr.read().split(',')))
         
         if self.public_key == None or self.private_key == None:
             print('Can not load key')
@@ -151,7 +156,6 @@ if __name__ == '__main__':
     RSA = RSA_NHOM6()
     # RSA.generate_key()
     RSA.load_key()
-
     
     # text = 99
     # C = RSA.encrypt(text)
