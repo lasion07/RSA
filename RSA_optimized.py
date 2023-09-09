@@ -154,6 +154,7 @@ class RSA_NHOM6:
         temp = encoded_message.split()
         for i in temp:
             encoded.append(int(i))
+        
         # Calling the decrypting function decoding function
         for num in encoded:
             s += chr(self.decrypt(num))

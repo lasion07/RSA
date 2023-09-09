@@ -1,13 +1,15 @@
-import sys
-import socket
-import asyncio
-
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtWidgets import QWidget, QFileDialog
-from quamash import QEventLoop
+from PyQt5.QtCore import QTimer
+import sys
+import time
+import socket
+from threading import Thread
 
 from RSA_GUI import Ui_SercurityMessage
 from RSA_optimized import RSA_NHOM6
+
+new_messages = []
 
 class SercurityMessageApp(QtWidgets.QMainWindow):
     def __init__(self):
@@ -43,12 +45,42 @@ class SercurityMessageApp(QtWidgets.QMainWindow):
 
         # Reciever section
         # self.ui.Send_button.clicked.connect(self.send_message)
-        self.ui.Clear_2_button.clicked.connect(self.clear_reciever_input)
+        self.ui.Clear_2_button.clicked.connect(self.clear_receiver_input)
+
+    def listen(self):
+        global new_messages
+
+        while True:
+            response = self.s.recv(1024).decode()
+            if response:
+                new_messages.append(response)
+            time.sleep(.5)
+    
+    def display_new_message(self):
+        receiver_messages = self.ui.Receiver_input
+
+        # Check condition
+        private_key_text = self.ui.Private_key_input.toPlainText()
+        if private_key_text == '':
+            print('Private key input is empty')
+            return None
+
+        self.rsa.private_key = tuple(map(int, private_key_text.split(',')))
+
+        if self.rsa.private_key == '':
+            print('Can not load public key')
+            return None
+
+        while new_messages:
+            new_message = new_messages.pop(0)
+            receiver_messages.setText(receiver_messages.toPlainText() + '\n-----NEW MESSAGE-----\n')
+            receiver_messages.setText(receiver_messages.toPlainText() + 'Plaintext:\n' + self.rsa.decode(new_message) + '\n')
+            receiver_messages.setText(receiver_messages.toPlainText() + 'Ciphertext:\n' + new_message + '\n')
 
     def clear_sender_input(self):
         self.ui.Sender_text_input.setText('')
     
-    def clear_reciever_input(self):
+    def clear_receiver_input(self):
         self.ui.Receiver_input.setText('')
 
     def send_message(self):
@@ -128,28 +160,19 @@ class SercurityMessageApp(QtWidgets.QMainWindow):
     #     except:
     #         print('Can not import')
 
-    def clear_plaintext_input(self):
-        self.ui.Plain_text_input.setText('')
-
-    def clear_ciphertext_input(self):
-        self.ui.Cipher_text_input.setText('')
-
-
-async def update():
-    while True:
-        print('Updated')
-        await asyncio.sleep(1)
-
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    loop = QEventLoop(app)
-    asyncio.set_event_loop(loop)
-
     window = SercurityMessageApp()
+    window.setWindowTitle('Client');
+
     window.show()
 
-    with loop:
-        loop.run_forever()
-    
+    timer = QTimer()
+    timer.timeout.connect(window.display_new_message)
+    timer.start(1000)
+
+    thread = Thread(target=window.listen, daemon=True)
+    thread.start()
+
     sys.exit(app.exec_())
