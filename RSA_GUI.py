@@ -126,7 +126,7 @@ class Ui_SercurityMessage(object):
         self.Cipher_text_label.setText(_translate("SercurityMessage", "Cipher Text"))
         self.Plain_text_label.setText(_translate("SercurityMessage", "Plain Text"))
         self.Encrypt_button.setText(_translate("SercurityMessage", "Encrypt"))
-        self.Decrypt_button.setText(_translate("SercurityMessage", "Decrpypt"))
+        self.Decrypt_button.setText(_translate("SercurityMessage", "Decrypt"))
         self.e_label.setText(_translate("SercurityMessage", "e "))
         self.Import_button.setText(_translate("SercurityMessage", "Import"))
         self.Export_button.setText(_translate("SercurityMessage", "Export"))
