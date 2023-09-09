@@ -51,7 +51,7 @@ class SercurityMessageApp(QtWidgets.QMainWindow):
         print('Got connection from', addr )
 
         # Key generation section
-        self.ui.Generate_key_button.clicked.connect(self.generate_key)
+        # self.ui.Generate_key_button.clicked.connect(self.generate_key)
         # self.ui.Export_public_key_button.clicked.connect(self.export_button)
         # self.ui.Import_public_key_button.clicked.connect(self.import_button)
 
@@ -73,21 +73,21 @@ class SercurityMessageApp(QtWidgets.QMainWindow):
             time.sleep(.5)
     
     def display_new_message(self):
-        receiver_messages = self.ui.Receiver_input
-
-        # Check condition
-        private_key_text = self.ui.Private_key_input.toPlainText()
-        if private_key_text == '':
-            print('Private key input is empty')
-            return None
-
-        self.rsa.private_key = tuple(map(int, private_key_text.split(',')))
-
-        if self.rsa.private_key == '':
-            print('Can not load public key')
-            return None
-
         while new_messages:
+            receiver_messages = self.ui.Receiver_input
+
+            if self.rsa.private_key == None:
+                # Check condition
+                private_key_text = self.ui.Private_key_input.toPlainText()
+                if private_key_text == '':
+                    print('Private key input is empty')
+                    return None
+
+                self.rsa.private_key = tuple(map(int, private_key_text.split(',')))
+
+                if self.rsa.private_key == None:
+                    print('Can not load public key')
+                    return None
             new_message = new_messages.pop(0)
             receiver_messages.setText(receiver_messages.toPlainText() + '\n-----NEW MESSAGE-----\n')
             receiver_messages.setText(receiver_messages.toPlainText() + 'Plaintext:\n' + self.rsa.decode(new_message) + '\n')

@@ -36,7 +36,7 @@ class RSA_NHOM6:
             return gcd, x, y
 
         generate_time = time.time()
-        n_bit = 1024 # modulus size, default: 1024 bits
+        n_bit = 128 # modulus size, default: 1024 bits
 
         # Select random large prime numbers p and q
         p, q = -1, -1
@@ -157,7 +157,9 @@ class RSA_NHOM6:
         
         # Calling the decrypting function decoding function
         for num in encoded:
-            s += chr(self.decrypt(num))
+            decrypted_num = self.decrypt(num)
+            if decrypted_num < 99999:
+                s += chr(decrypted_num)
         
         # message = ''.join(str(p) + ' ' for p in s)
         return s
