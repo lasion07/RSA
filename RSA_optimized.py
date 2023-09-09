@@ -18,6 +18,9 @@ class RSA_NHOM6:
                 return a
             return gcd(b, a%b)
         
+        def lcm(a, b):
+            return (a // gcd(a, b))*b
+        
         def extended_gcd(a, b): # Log(n)
             # Base Case
             if a == 0:
@@ -44,11 +47,11 @@ class RSA_NHOM6:
         
         while True:
             q = rm.getLowLevelPrime(n_bit)
-            if rm.isMillerRabinPassed(q):
+            if p != q and rm.isMillerRabinPassed(q):
                 break
 
         n = p * q
-        phi_n = (p - 1) * (q - 1)
+        phi_n = lcm(p-1, q-1)#(p - 1) * (q - 1)
 
         # Select e
         e = e_default
@@ -86,13 +89,12 @@ class RSA_NHOM6:
         
         print(f'Saved temp keys in {save_path}/')
 
-    def load_key(self, path='keys'):
-        with open(f'{path}/public_key.txt', mode='r') as pu:
-            self.public_key = set(map(int, pu.read().split(',')))
-            print(pu.read())
+    def load_key(self, pu_path, pr_path):
+        with open(pu_path, mode='r') as pu:
+            self.public_key = tuple(map(int, pu.read().split(',')))
         
-        with open(f'{path}/private_key.txt', mode='r') as pr:
-            self.private_key = set(map(int, pr.read().split(',')))
+        with open(pr_path, mode='r') as pr:
+            self.private_key = tuple(map(int, pr.read().split(',')))
         
         if self.public_key == None or self.private_key == None:
             print('Can not load key')
@@ -142,13 +144,21 @@ class RSA_NHOM6:
         # Calling the encrypting function in encoding function
         for letter in message:
             encoded.append(self.encrypt(ord(letter)))
-        return encoded
+        
+        encoded_message = ''.join(str(p) + ' ' for p in encoded)
+        return encoded_message
     
-    def decode(self, encoded):
+    def decode(self, encoded_message):
         s = ''
+        encoded = []
+        temp = encoded_message.split()
+        for i in temp:
+            encoded.append(int(i))
         # Calling the decrypting function decoding function
         for num in encoded:
             s += chr(self.decrypt(num))
+        
+        # message = ''.join(str(p) + ' ' for p in s)
         return s
 
 
@@ -156,21 +166,3 @@ if __name__ == '__main__':
     RSA = RSA_NHOM6()
     # RSA.generate_key()
     RSA.load_key()
-    
-    # text = 99
-    # C = RSA.encrypt(text)
-    # M = RSA.decrypt(C)
-
-    # print('Plaintext:', text)
-    # print('Ciphertext:', C)
-    # print('Decrypted ciphertext:', M)
-
-    message = "A secret!"
-    coded = RSA.encode(message)
-
-    print("Initial message:")
-    print(message)
-    print("\n\nThe encoded message(encrypted by public key)")
-    print(''.join(str(p) for p in coded))
-    print("\n\nThe decoded message(decrypted by public key)")
-    print(''.join(str(p) for p in RSA.decode(coded)))
